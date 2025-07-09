@@ -14,7 +14,7 @@ st.set_page_config(
 # ---------------------- Branding -------------------------
 st.markdown("""
     <div style="display: flex; justify-content: space-evenly; align-items: center;">
-        <img src="./gtu_logo.png"/>
+        <img src="./gtu_logo.png" style="max-width: 15px height: auto"/>
         <img src="./intel_logo.png"/>
         <img src="/flavi_logo.png"/>
     </div>
