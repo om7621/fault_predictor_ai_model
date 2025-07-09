@@ -1,97 +1,84 @@
 import streamlit as st
 import joblib
 import numpy as np
-from PIL import Image
+import os
 
-# Load model
-model = joblib.load("fault_model.pkl")
-
-# Set page config
+# ---------------------- Page Config ----------------------
 st.set_page_config(
-    page_title="AI Fault Predictor - Flavi Dairy Solutions",
-    page_icon="🧠",
-    layout="wide"
+    page_title="Fault Predictor AI",
+    layout="centered",
+    page_icon="🔧"
 )
 
-# Load logos
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.image("gtu_logo.png", width=150)
-with col2:
-    st.image("flavi_logo.png", width=180)
-with col3:
-    st.image("intel_logo.png", width=150)
+# ---------------------- Branding -------------------------
+st.image("images/gtu_logo.png", width=100)
+st.image("images/intel_logo.png", width=100)
+st.image("images/flavi_logo.png", width=150)
 
-# Header
 st.markdown("""
-    <h1 style='text-align: center; color: #2c3e50;'>Fault Prediction AI Application</h1>
-    <h4 style='text-align: center; color: gray;'>Developed under Intel AI Digital Readiness Program in collaboration with Flavi Dairy Solutions and GTU</h4>
-    <hr style='border: 1px solid #ccc;'>
+    <h2 style='text-align: center;'>Fault Prediction AI Model</h2>
+    <h5 style='text-align: center;'>Based on Temperature & Vibration Data</h5>
+    <h6 style='text-align: center;'>Project made under Intel AI Digital Readiness Program (GTU)</h6>
+    <h6 style='text-align: center;'>In collaboration with Flavi Dairy Solutions India</h6>
+    <hr style='border:1px solid #ccc'>
 """, unsafe_allow_html=True)
 
-# Sidebar - Machinery selection
-machinery = st.sidebar.selectbox("Select Machinery", ["Motor", "Milk Blender", "Churning Machine", "Packaging Unit"])
-
-# Info for selected machine
-machinery_info = {
-    "Motor": "Enter real-time motor data including temperature, vibration, and pressure.",
-    "Milk Blender": "Provide sensor readings for blender operation.",
-    "Churning Machine": "Churning systems involve critical rotating components; monitor vibration and temperature.",
-    "Packaging Unit": "Focus on conveyor and sealing unit sensor data."
-}
-st.sidebar.markdown(f"**🛠 Info:** {machinery_info[machinery]}")
-
-# Machinery images
-machinery_images = {
+# ---------------------- Machine Image Display -------------------------
+machine_options = {
     "Motor": "motor.png",
     "Milk Blender": "milk_blender.png",
     "Churning Machine": "churning_machine.png",
     "Packaging Unit": "packaging_unit.png"
 }
 
-st.markdown(f"""
-    <div style='text-align: center;'>
-        <img src='{machinery_images[machinery]}' width='400' style='border:1px solid #ddd; border-radius:10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);'>
-        <p style='color:gray'><b>{machinery}</b></p>
-    </div>
-""", unsafe_allow_html=True)
+selected_machine = st.selectbox("Select Machine", list(machine_options.keys()))
+image_path = f"images/{machine_options[selected_machine]}"
 
-# Input fields
-st.markdown(f"### Enter Sensor Data for: {machinery}")
-st.info("Refer to typical range: Vibration (0.1–1.0 mm/s), Temp (60–120 °C), Pressure (7–10 bar)")
+if os.path.exists(image_path):
+    st.image(image_path, caption=selected_machine, use_column_width=True)
+else:
+    st.warning("Image not found. Please check your directory structure.")
 
-col1, col2, col3 = st.columns(3)
+# ---------------------- Input Fields -------------------------
+st.subheader("📥 Enter Sensor Data")
+
+col1, col2 = st.columns(2)
 
 with col1:
-    vibration = st.number_input("Vibration (mm/s)", min_value=0.0, max_value=5.0, value=0.5)
+    vibration = st.number_input("Vibration (mm/s)", min_value=0.0, value=5.0, step=0.1)
+    rms_vibration = st.number_input("RMS Vibration", min_value=0.0, value=5.5, step=0.1)
+    pressure = st.number_input("Pressure (bar)", min_value=0.0, value=1.0, step=0.1)
+
 with col2:
-    temperature = st.number_input("Temperature (°C)", min_value=0.0, max_value=200.0, value=90.0)
-with col3:
-    pressure = st.number_input("Pressure (bar)", min_value=0.0, max_value=15.0, value=8.0)
+    temperature = st.number_input("Temperature (°C)", min_value=0.0, value=30.0, step=0.5)
+    mean_temp = st.number_input("Mean Temp", min_value=0.0, value=29.0, step=0.5)
 
-col4, col5 = st.columns(2)
-with col4:
-    rms_vib = st.number_input("RMS Vibration", min_value=0.0, max_value=5.0, value=0.6)
-with col5:
-    mean_temp = st.number_input("Mean Temp", min_value=0.0, max_value=200.0, value=90.0)
-
-# Predict
+# ---------------------- Prediction -------------------------
 if st.button("🔍 Predict Fault"):
-    input_data = np.array([[vibration, temperature, pressure, rms_vib, mean_temp]])
-    prediction = model.predict(input_data)[0]
-    label_map = {0: "No Fault", 1: "Minor Fault", 2: "Critical Fault"}
-    st.success(f"Prediction Result: **{label_map[prediction]}**")
+    try:
+        model = joblib.load("fault_model.pkl")
 
-    if prediction == 2:
-        st.error("⚠ Critical issue detected! Immediate inspection recommended.")
-    elif prediction == 1:
-        st.warning("Minor irregularity. Schedule maintenance soon.")
-    else:
-        st.balloons()
-        st.info("System is working normally.")
+        # Dummy rolling values, assumed from average ranges
+        vib_roll_mean = vibration * 0.95
+        vib_roll_std = 0.4
+        temp_roll_mean = temperature * 0.97
+        temp_roll_std = 0.5
+        pressure_roll_mean = pressure * 0.96
+        pressure_roll_std = 0.3
 
-# Footer
-st.markdown("""
-    <hr>
-    <p style='text-align: center; color: gray;'>© 2025 Flavi Dairy Solutions | Developed with ❤️ by Om Singh</p>
-""", unsafe_allow_html=True)
+        input_data = np.array([
+            vibration, temperature, pressure,
+            rms_vibration, mean_temp,
+            vib_roll_mean, vib_roll_std,
+            temp_roll_mean, temp_roll_std,
+            pressure_roll_mean, pressure_roll_std
+        ]).reshape(1, -1)
+
+        prediction = model.predict(input_data)[0]
+        st.success(f"🧠 Predicted Fault Label: {prediction}")
+
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
+
+# ---------------------- Footer -------------------------
+st.markdown("<hr><center>© 2025 Flavi Dairy Solutions | GTU | Intel</center>", unsafe_allow_html=True)
