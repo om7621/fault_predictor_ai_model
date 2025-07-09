@@ -14,9 +14,9 @@ st.set_page_config(
 # ---------------------- Branding -------------------------
 st.markdown("""
     <div style="display: flex; justify-content: space-evenly; align-items: center;">
-        <img src="images/gtu_logo.png" style="height: 60px;"/>
-        <img src="images/intel_logo.png" style="height: 60px;"/>
-        <img src="images/flavi_logo.png" style="height: 80px;"/>
+        <img src="images/gtu_logo.png"/>
+        <img src="images/intel_logo.png"/>
+        <img src="images/flavi_logo.png"/>
     </div>
     <h2 style='text-align: center;'>Fault Prediction AI Model</h2>
     <h5 style='text-align: center;'>Based on Temperature & Vibration Data</h5>
