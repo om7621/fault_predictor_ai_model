@@ -16,7 +16,7 @@ st.markdown("""
     <div style="display: flex; justify-content: space-evenly; align-items: center;">
         <img src="./gtu_logo.png"/>
         <img src="./intel_logo.png"/>
-        <img src="./flavi_logo.png"/>
+        <img src="/flavi_logo.png"/>
     </div>
     <h2 style='text-align: center;'>Fault Prediction AI Model</h2>
     <h5 style='text-align: center;'>Based on Temperature & Vibration Data</h5>
@@ -25,8 +25,8 @@ st.markdown("""
     <hr style='border:1px solid #ccc'>
 """, unsafe_allow_html=True)
 
-# ---------------------- Machine Image Display -------------------------
 st.subheader("🛠️ Select Machinery")
+
 machine_options = {
     "Motor": "motor.png",
     "Milk Blender": "milk_blender.png",
@@ -35,13 +35,16 @@ machine_options = {
 }
 
 selected_machine = st.selectbox("Select Machine", list(machine_options.keys()))
-image_path = f"images/{machine_options[selected_machine]}"
+image_path = os.path.join("images", machine_options[selected_machine])
 
-if os.path.exists(image_path):
-    img = Image.open(image_path)
-    st.image(img, caption=selected_machine, use_column_width=False, width=300)
-else:
-    st.warning("🔺 Image not found. Please check your directory structure.")
+# Optional: place image inside a small column for layout control
+with st.container():
+    if os.path.exists(image_path):
+        img = Image.open(image_path)
+        # Display image with fixed small width (not fullscreen)
+        st.image(img, caption=selected_machine, use_column_width=False, width=250)
+    else:
+        st.warning("🔺 Image not found. Please check your directory structure.")
 
 # ---------------------- Input Fields -------------------------
 st.subheader("📥 Enter Sensor Data")
