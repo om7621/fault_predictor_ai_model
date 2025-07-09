@@ -6,23 +6,20 @@ import os
 # ---------------------- Page Config ----------------------
 st.set_page_config(
     page_title="Fault Predictor AI",
-    layout="centered",
+    layout="wide",
     page_icon="🔧"
 )
 
 # ---------------------- Branding -------------------------
-col_logo = st.columns([1, 1, 1])
-with col_logo[0]:
-    st.image("images/gtu_logo.png", width=100)
-with col_logo[1]:
-    st.image("images/intel_logo.png", width=100)
-with col_logo[2]:
-    st.image("images/flavi_logo.png", width=150)
-
 st.markdown("""
+    <div style="display: flex; justify-content: space-around; align-items: center;">
+        <img src="images/gtu_logo.png" width="100"/>
+        <img src="images/intel_logo.png" width="100"/>
+        <img src="images/flavi_logo.png" width="140"/>
+    </div>
     <h2 style='text-align: center;'>Fault Prediction AI Model</h2>
     <h5 style='text-align: center;'>Based on Temperature & Vibration Data</h5>
-    <h6 style='text-align: center;'>Project made under Intel AI Digital Readiness Program (GTU)</h6>
+    <h6 style='text-align: center;'>Project under Intel AI Digital Readiness Program (GTU)</h6>
     <h6 style='text-align: center;'>In collaboration with Flavi Dairy Solutions India</h6>
     <hr style='border:1px solid #ccc'>
 """, unsafe_allow_html=True)
@@ -40,13 +37,12 @@ selected_machine = st.selectbox("Select Machine", list(machine_options.keys()))
 image_path = f"images/{machine_options[selected_machine]}"
 
 if os.path.exists(image_path):
-    st.image(image_path, caption=selected_machine, use_column_width=True)
+    st.image(image_path, caption=selected_machine, use_column_width="auto")
 else:
-    st.warning("Image not found. Please check your directory structure.")
+    st.warning("🔺 Image not found. Please check your directory structure.")
 
 # ---------------------- Input Fields -------------------------
 st.subheader("📥 Enter Sensor Data")
-
 col1, col2 = st.columns(2)
 
 with col1:
@@ -59,11 +55,12 @@ with col2:
     mean_temp = st.number_input("Mean Temp", min_value=0.0, value=29.0, step=0.5, help="Typical range: 25.0 - 85.0")
 
 # ---------------------- Prediction -------------------------
+st.markdown("""<br><center>Press the button below after entering all sensor data</center>""", unsafe_allow_html=True)
+
 if st.button("🔍 Predict Fault"):
     try:
         model = joblib.load("fault_model.pkl")
 
-        # Dummy rolling values
         vib_roll_mean = vibration * 0.95
         vib_roll_std = 0.4
         temp_roll_mean = temperature * 0.97
@@ -79,7 +76,6 @@ if st.button("🔍 Predict Fault"):
             pressure_roll_mean, pressure_roll_std
         ]).reshape(1, -1)
 
-        # Ensure feature shape matches model expectations
         if input_data.shape[1] != model.n_features_in_:
             raise ValueError(f"Input feature mismatch. Expected {model.n_features_in_} features.")
 
