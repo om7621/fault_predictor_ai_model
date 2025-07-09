@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import numpy as np
 import os
+from PIL import Image
 
 # ---------------------- Page Config ----------------------
 st.set_page_config(
@@ -12,10 +13,10 @@ st.set_page_config(
 
 # ---------------------- Branding -------------------------
 st.markdown("""
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <img src="images/gtu_logo.png" width="80"/>
-        <img src="images/intel_logo.png" width="80"/>
-        <img src="images/flavi_logo.png" width="110"/>
+    <div style="display: flex; justify-content: space-evenly; align-items: center;">
+        <img src="images/gtu_logo.png" style="height: 60px;"/>
+        <img src="images/intel_logo.png" style="height: 60px;"/>
+        <img src="images/flavi_logo.png" style="height: 80px;"/>
     </div>
     <h2 style='text-align: center;'>Fault Prediction AI Model</h2>
     <h5 style='text-align: center;'>Based on Temperature & Vibration Data</h5>
@@ -37,7 +38,8 @@ selected_machine = st.selectbox("Select Machine", list(machine_options.keys()))
 image_path = f"images/{machine_options[selected_machine]}"
 
 if os.path.exists(image_path):
-    st.image(image_path, caption=selected_machine, use_column_width=False, width=350)
+    img = Image.open(image_path)
+    st.image(img, caption=selected_machine, use_column_width=False, width=300)
 else:
     st.warning("🔺 Image not found. Please check your directory structure.")
 
