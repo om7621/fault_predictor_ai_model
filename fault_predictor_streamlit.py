@@ -11,9 +11,13 @@ st.set_page_config(
 )
 
 # ---------------------- Branding -------------------------
-st.image("images/gtu_logo.png", width=100)
-st.image("images/intel_logo.png", width=100)
-st.image("images/flavi_logo.png", width=150)
+col_logo = st.columns([1, 1, 1])
+with col_logo[0]:
+    st.image("images/gtu_logo.png", width=100)
+with col_logo[1]:
+    st.image("images/intel_logo.png", width=100)
+with col_logo[2]:
+    st.image("images/flavi_logo.png", width=150)
 
 st.markdown("""
     <h2 style='text-align: center;'>Fault Prediction AI Model</h2>
@@ -24,6 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------- Machine Image Display -------------------------
+st.subheader("🛠️ Select Machinery")
 machine_options = {
     "Motor": "motor.png",
     "Milk Blender": "milk_blender.png",
@@ -45,20 +50,20 @@ st.subheader("📥 Enter Sensor Data")
 col1, col2 = st.columns(2)
 
 with col1:
-    vibration = st.number_input("Vibration (mm/s)", min_value=0.0, value=5.0, step=0.1)
-    rms_vibration = st.number_input("RMS Vibration", min_value=0.0, value=5.5, step=0.1)
-    pressure = st.number_input("Pressure (bar)", min_value=0.0, value=1.0, step=0.1)
+    vibration = st.number_input("Vibration (mm/s)", min_value=0.0, value=5.0, step=0.1, help="Typical range: 0.0 - 25.0")
+    rms_vibration = st.number_input("RMS Vibration", min_value=0.0, value=5.5, step=0.1, help="Typical range: 0.0 - 30.0")
+    pressure = st.number_input("Pressure (bar)", min_value=0.0, value=1.0, step=0.1, help="Typical range: 0.5 - 5.0")
 
 with col2:
-    temperature = st.number_input("Temperature (°C)", min_value=0.0, value=30.0, step=0.5)
-    mean_temp = st.number_input("Mean Temp", min_value=0.0, value=29.0, step=0.5)
+    temperature = st.number_input("Temperature (°C)", min_value=0.0, value=30.0, step=0.5, help="Typical range: 20.0 - 90.0")
+    mean_temp = st.number_input("Mean Temp", min_value=0.0, value=29.0, step=0.5, help="Typical range: 25.0 - 85.0")
 
 # ---------------------- Prediction -------------------------
 if st.button("🔍 Predict Fault"):
     try:
         model = joblib.load("fault_model.pkl")
 
-        # Dummy rolling values, assumed from average ranges
+        # Dummy rolling values
         vib_roll_mean = vibration * 0.95
         vib_roll_std = 0.4
         temp_roll_mean = temperature * 0.97
@@ -74,11 +79,16 @@ if st.button("🔍 Predict Fault"):
             pressure_roll_mean, pressure_roll_std
         ]).reshape(1, -1)
 
+        # Ensure feature shape matches model expectations
+        if input_data.shape[1] != model.n_features_in_:
+            raise ValueError(f"Input feature mismatch. Expected {model.n_features_in_} features.")
+
         prediction = model.predict(input_data)[0]
         st.success(f"🧠 Predicted Fault Label: {prediction}")
 
     except Exception as e:
-        st.error(f"❌ Error: {e}")
+        st.error("❌ An error occurred while making prediction.")
+        st.exception(e)
 
 # ---------------------- Footer -------------------------
 st.markdown("<hr><center>© 2025 Flavi Dairy Solutions | GTU | Intel</center>", unsafe_allow_html=True)
